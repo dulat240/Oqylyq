@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F62FE">
+<title>Oqýlyq — для чтения книг</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   OQÝLYQ — DESIGN TOKENS
+   ============================================================ */
+:root{
+  --blue:#0F62FE;
+  --blue-2:#4CC9F0;
+  --green:#43AA8B;
+  --yellow:#F9C74F;
+  --red:#F94144;
+ 
+  --radius-lg:28px;
+  --radius-md:22px;
+  --radius-sm:16px;
+ 
+  --font-display:'Sora', 'Manrope', sans-serif;
+  --font-body:'Manrope', sans-serif;
+ 
+  --shadow-soft:0 10px 30px rgba(15,23,42,.08), 0 2px 8px rgba(15,23,42,.04);
+  --shadow-strong:0 20px 50px rgba(15,23,42,.16), 0 4px 14px rgba(15,23,42,.08);
+ 
+  --bg:#F4F7FC;
+  --bg-grad:radial-gradient(circle at 10% -10%, #E8F0FF 0%, transparent 45%),
+             radial-gradient(circle at 90% 0%, #E4FBFF 0%, transparent 40%),
+             linear-gradient(180deg,#F6F9FF 0%, #EEF2FA 100%);
+  --surface: rgba(255,255,255,.62);
+  --surface-solid:#ffffff;
+  --border: rgba(15,23,42,.07);
+  --text:#0B1120;
+  --text-dim:#5B6478;
+  --text-faint:#8B93A7;
+  --nav-bg: rgba(255,255,255,.75);
+}
+:root[data-theme="dark"]{
+  --bg:#0A0E17;
+  --bg-grad:radial-gradient(circle at 10% -10%, #12203a 0%, transparent 45%),
+             radial-gradient(circle at 90% 0%, #0d2a2c 0%, transparent 40%),
+             linear-gradient(180deg,#0A0E17 0%, #090C13 100%);
+  --surface: rgba(22,27,41,.6);
+  --surface-solid:#141926;
+  --border: rgba(255,255,255,.08);
+  --text:#F1F4FB;
+  --text-dim:#A9B1C6;
+  --text-faint:#6B7387;
+  --nav-bg: rgba(16,20,32,.75);
+  --shadow-soft:0 10px 30px rgba(0,0,0,.35), 0 2px 8px rgba(0,0,0,.2);
+  --shadow-strong:0 20px 50px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.3);
+}
+ 
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  margin:0; font-family:var(--font-body); background:var(--bg-grad),var(--bg);
+  background-attachment:fixed;
+  color:var(--text); overflow-x:hidden; transition:background .4s ease, color .4s ease;
+  min-height:100vh;
+}
+h1,h2,h3,h4{font-family:var(--font-display); margin:0; letter-spacing:-.02em;}
+p{margin:0;}
+button{font-family:var(--font-body); cursor:pointer;}
+input,select,textarea{font-family:var(--font-body);}
+::selection{background:var(--blue); color:#fff;}
+a{color:inherit;}
+:focus-visible{outline:3px solid var(--blue-2); outline-offset:2px; border-radius:8px;}
+ 
+/* Utility */
+.hidden{display:none !important;}
+.flex{display:flex;}
+.grid{display:grid;}
+.gap-8{gap:8px;} .gap-12{gap:12px;} .gap-16{gap:16px;} .gap-20{gap:20px;}
+.muted{color:var(--text-dim);}
+.faint{color:var(--text-faint);}
+.center{align-items:center; justify-content:center;}
+.between{justify-content:space-between;}
+.w-full{width:100%;}
+.mt-8{margin-top:8px;} .mt-12{margin-top:12px;} .mt-16{margin-top:16px;} .mt-24{margin-top:24px;}
+ 
+/* Glass card */
+.glass{
+  background:var(--surface);
+  backdrop-filter:blur(22px) saturate(160%);
+  -webkit-backdrop-filter:blur(22px) saturate(160%);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-soft);
+}
+.glass-sm{border-radius:var(--radius-sm);}
+ 
+/* Buttons */
+.btn{
+  position:relative; overflow:hidden;
+  border:none; border-radius:18px; padding:16px 22px; font-weight:700; font-size:15px;
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+}
+.btn:active{transform:scale(.96);}
+.btn-primary{background:linear-gradient(135deg, var(--blue), #4C8DFE); color:#fff; box-shadow:0 10px 24px rgba(15,98,254,.35);}
+.btn-primary:hover{box-shadow:0 14px 30px rgba(15,98,254,.45);}
+.btn-secondary{background:var(--surface-solid); color:var(--text); border:1px solid var(--border);}
+.btn-ghost{background:transparent; color:var(--text-dim); border:1px solid var(--border);}
+.btn-danger{background:linear-gradient(135deg, var(--red), #ff6b6e); color:#fff;}
+.btn-block{width:100%;}
+.btn-lg{padding:20px 26px; font-size:17px; border-radius:22px;}
+.btn-icon{padding:12px; border-radius:14px; background:var(--surface-solid); border:1px solid var(--border); color:var(--text);}
+.ripple{position:absolute; border-radius:50%; background:rgba(255,255,255,.55); transform:scale(0); animation:rippleAnim .6s ease-out; pointer-events:none;}
+[data-theme="dark"] .btn-secondary .ripple, [data-theme="dark"] .btn-ghost .ripple, [data-theme="dark"] .btn-icon .ripple{background:rgba(255,255,255,.18);}
+@keyframes rippleAnim{to{transform:scale(2.6); opacity:0;}}
+ 
+/* Inputs */
+.field{display:flex; flex-direction:column; gap:6px; margin-bottom:14px;}
+.field label{font-size:13px; font-weight:600; color:var(--text-dim);}
+.field input, .field select, .field textarea{
+  padding:14px 16px; border-radius:14px; border:1.5px solid var(--border);
+  background:var(--surface-solid); color:var(--text); font-size:15px; outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.field input:focus, .field select:focus, .field textarea:focus{border-color:var(--blue); box-shadow:0 0 0 4px rgba(15,98,254,.12);}
+.field .err{color:var(--red); font-size:12.5px; min-height:14px;}
+.field.error input{border-color:var(--red);}
+ 
+/* Fade/slide animations */
+.fade-up{animation:fadeUp .5s cubic-bezier(.2,.8,.2,1) both;}
+@keyframes fadeUp{from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:translateY(0);}}
+.screen{animation:screenIn .35s ease both;}
+@keyframes screenIn{from{opacity:0; transform:translateY(10px) scale(.99);} to{opacity:1; transform:translateY(0) scale(1);}}
+ 
+/* ============================================================
+   AUTH SCREEN
+   ============================================================ */
+#authScreen{
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+}
+.auth-wrap{width:100%; max-width:420px;}
+.brand{text-align:center; margin-bottom:28px;}
+.brand-logo{
+  width:76px; height:76px; margin:0 auto 14px; border-radius:24px;
+  background:linear-gradient(135deg, var(--blue), var(--blue-2));
+  display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-strong);
+}
+.brand-logo svg{width:40px; height:40px;}
+.brand h1{font-size:32px; font-weight:800;}
+.brand p{color:var(--text-dim); margin-top:6px; font-size:15px;}
+.auth-card{padding:28px;}
+.tabs{display:flex; background:var(--surface-solid); border:1px solid var(--border); border-radius:16px; padding:4px; margin-bottom:22px;}
+.tab-btn{flex:1; padding:11px; border:none; background:transparent; border-radius:12px; font-weight:700; color:var(--text-dim); transition:all .2s;}
+.tab-btn.active{background:linear-gradient(135deg, var(--blue), #4C8DFE); color:#fff; box-shadow:0 6px 16px rgba(15,98,254,.3);}
+.auth-toggle{display:flex; gap:8px; margin-bottom:14px;}
+.chip-toggle{flex:1; text-align:center; padding:10px; border-radius:12px; border:1.5px solid var(--border); font-weight:600; font-size:13.5px; color:var(--text-dim);}
+.chip-toggle.active{border-color:var(--blue); color:var(--blue); background:rgba(15,98,254,.08);}
+.row-2{display:flex; gap:10px;}
+.row-2 .field{flex:1;}
+ 
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+#appShell{display:none; min-height:100vh; padding-bottom:96px;}
+#appShell.active{display:block;}
+.app-header{
+  padding:18px 18px 10px; display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:40;
+}
+.header-user{display:flex; align-items:center; gap:12px;}
+.avatar{
+  width:48px; height:48px; border-radius:16px; display:flex; align-items:center; justify-content:center;
+  font-weight:800; color:#fff; font-size:17px; flex-shrink:0;
+  box-shadow:0 6px 14px rgba(0,0,0,.15);
+}
+.header-user h3{font-size:16px;}
+.header-user span{font-size:12.5px; color:var(--text-dim);}
+.header-actions{display:flex; gap:10px;}
+ 
+main.container{padding:6px 18px 20px; max-width:640px; margin:0 auto;}
+section.screen-section{display:none;}
+section.screen-section.active{display:block;}
+ 
+/* Stat pills row */
+.stat-pills{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:14px 0 18px;}
+.stat-pill{padding:16px 10px; text-align:center;}
+.stat-pill b{display:block; font-size:20px; font-family:var(--font-display);}
+.stat-pill span{font-size:11.5px; color:var(--text-dim); font-weight:600;}
+ 
+/* Big CTA */
+.cta-card{
+  padding:30px 26px; text-align:center; position:relative; overflow:hidden;
+  background:linear-gradient(135deg, rgba(15,98,254,.14), rgba(76,201,240,.12));
+}
+.cta-card h2{font-size:22px; margin-bottom:6px;}
+.cta-card p{color:var(--text-dim); font-size:14px; margin-bottom:20px;}
+.cta-glow{position:absolute; width:220px; height:220px; border-radius:50%; background:radial-gradient(circle, rgba(76,201,240,.35), transparent 70%); top:-80px; right:-60px; filter:blur(10px);}
+ 
+/* Section title */
+.sec-title{display:flex; align-items:center; justify-content:space-between; margin:22px 0 12px;}
+.sec-title h3{font-size:18px;}
+.sec-title a{font-size:13px; color:var(--blue); font-weight:700;}
+ 
+/* Activity / history card */
+.activity-card{padding:18px; margin-bottom:12px; display:flex; gap:14px; cursor:default;}
+.book-cover{
+  width:56px; height:76px; border-radius:12px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px;
+  box-shadow:0 6px 14px rgba(0,0,0,.18);
+}
+.activity-info{flex:1; min-width:0;}
+.activity-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+.activity-top h4{font-size:15px; line-height:1.3;}
+.activity-top p{font-size:12.5px; color:var(--text-dim); margin-top:2px;}
+.mood-badge{font-size:20px;}
+.activity-meta{display:flex; gap:14px; margin-top:10px; flex-wrap:wrap;}
+.meta-item{font-size:12.5px; color:var(--text-dim); display:flex; align-items:center; gap:5px; font-weight:600;}
+.meta-item b{color:var(--text); font-weight:800;}
+.activity-actions{display:flex; gap:8px; margin-top:12px;}
+.mini-btn{padding:7px 12px; font-size:12px; border-radius:10px; font-weight:700; border:1px solid var(--border); background:var(--surface-solid); color:var(--text-dim); display:flex; align-items:center; gap:5px;}
+.mini-btn.liked{color:var(--red); border-color:rgba(249,65,68,.3); background:rgba(249,65,68,.08);}
+ 
+.search-bar{display:flex; gap:10px; align-items:center; padding:12px 16px; margin-bottom:16px;}
+.search-bar input{flex:1; border:none; background:transparent; outline:none; font-size:14.5px; color:var(--text);}
+.filter-row{display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; padding-bottom:2px;}
+.filter-chip{padding:9px 16px; border-radius:12px; border:1.5px solid var(--border); font-size:13px; font-weight:700; color:var(--text-dim); white-space:nowrap;}
+.filter-chip.active{background:var(--blue); border-color:var(--blue); color:#fff;}
+ 
+.empty-state{text-align:center; padding:50px 20px; color:var(--text-dim);}
+.empty-state svg{width:56px; height:56px; opacity:.4; margin-bottom:12px;}
+.empty-state h4{color:var(--text); font-size:16px; margin-bottom:6px;}
+ 
+/* Stats dashboard */
+.stats-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:16px 0;}
+.stats-grid .glass{padding:16px;}
+.stats-grid b{display:block; font-size:22px; font-family:var(--font-display);}
+.stats-grid span{font-size:12px; color:var(--text-dim); font-weight:600;}
+.chart-card{padding:20px; margin-bottom:16px;}
+.chart-tabs{display:flex; gap:8px; margin-bottom:14px;}
+canvas.chart{width:100%; height:180px; display:block;}
+.calendar-wrap{overflow-x:auto; padding:4px 2px 8px;}
+.cal-grid{display:grid; grid-auto-flow:column; grid-template-rows:repeat(7,12px); gap:3px;}
+.cal-cell{width:12px; height:12px; border-radius:3px; background:var(--border);}
+ 
+/* Groups */
+.group-card{padding:18px; margin-bottom:12px; display:flex; gap:14px; align-items:center;}
+.group-info{flex:1;}
+.group-info h4{font-size:15.5px;}
+.group-info p{font-size:12.5px; color:var(--text-dim); margin-top:3px;}
+.group-code{font-size:11px; font-weight:800; letter-spacing:.06em; color:var(--blue); background:rgba(15,98,254,.1); padding:4px 8px; border-radius:8px; display:inline-block; margin-top:6px;}
+ 
+/* Leaderboard */
+.lb-row{display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:16px; margin-bottom:8px;}
+.lb-rank{width:26px; text-align:center; font-weight:800; font-family:var(--font-display); color:var(--text-dim);}
+.lb-rank.top1{color:var(--yellow);} .lb-rank.top2{color:#B9C2D0;} .lb-rank.top3{color:#CD8B5C;}
+.lb-name{flex:1;}
+.lb-name b{display:block; font-size:14px;}
+.lb-name span{font-size:11.5px; color:var(--text-dim);}
+.lb-val{font-weight:800; font-family:var(--font-display); color:var(--blue);}
+ 
+/* Profile */
+.profile-head{text-align:center; padding:30px 20px;}
+.profile-avatar{width:88px; height:88px; border-radius:26px; margin:0 auto 14px; font-size:32px;}
+.level-bar-wrap{background:var(--surface-solid); border:1px solid var(--border); border-radius:20px; height:14px; margin-top:14px; overflow:hidden;}
+.level-bar{height:100%; background:linear-gradient(90deg, var(--blue), var(--blue-2)); border-radius:20px; transition:width .6s ease;}
+.badges-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:16px;}
+.badge{padding:14px 6px; text-align:center; border-radius:18px;}
+.badge .ic{font-size:26px; margin-bottom:6px; display:block;}
+.badge span{font-size:10px; font-weight:700; color:var(--text-dim); display:block;}
+.badge.locked{opacity:.32; filter:grayscale(1);}
+ 
+/* Timer screen */
+#timerScreen{position:fixed; inset:0; z-index:200; display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center; background:var(--bg-grad),var(--bg);}
+#timerScreen.active{display:flex;}
+.timer-ring-wrap{position:relative; width:280px; height:280px; margin-bottom:34px;}
+.timer-ring-wrap svg{width:100%; height:100%; transform:rotate(-90deg);}
+.timer-ring-bg{fill:none; stroke:var(--border); stroke-width:10;}
+.timer-ring-fg{fill:none; stroke:url(#ringGrad); stroke-width:10; stroke-linecap:round; transition:stroke-dashoffset .3s linear;}
+.timer-display{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+.timer-time{font-family:var(--font-display); font-size:44px; font-weight:800; font-variant-numeric:tabular-nums;}
+.timer-label{color:var(--text-dim); font-size:13px; margin-top:4px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;}
+.pulse{animation:pulse 2.2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.035);}}
+.timer-controls{display:flex; gap:16px;}
+.timer-btn{width:74px; height:74px; border-radius:50%; border:none; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-strong);}
+.timer-btn svg{width:28px; height:28px;}
+.timer-book-title{font-size:15px; color:var(--text-dim); margin-bottom:6px; font-weight:600;}
+ 
+/* Bottom nav */
+.bottom-nav{
+  position:fixed; bottom:14px; left:16px; right:16px; max-width:520px; margin:0 auto;
+  display:flex; justify-content:space-around; padding:10px 6px; z-index:100;
+  background:var(--nav-bg); backdrop-filter:blur(24px); border:1px solid var(--border); border-radius:26px; box-shadow:var(--shadow-strong);
+}
+.nav-btn{background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 10px; border-radius:16px; color:var(--text-faint); flex:1; transition:all .2s;}
+.nav-btn svg{width:22px; height:22px;}
+.nav-btn span{font-size:10px; font-weight:700;}
+.nav-btn.active{color:var(--blue); background:rgba(15,98,254,.1);}
+ 
+/* Dialogs / modals */
+dialog.modal{
+  border:none; padding:0; border-radius:26px; width:min(460px,92vw); max-height:88vh; overflow:auto;
+  background:var(--surface-solid); color:var(--text); box-shadow:var(--shadow-strong);
+}
+dialog.modal::backdrop{background:rgba(8,12,20,.55); backdrop-filter:blur(3px);}
+.modal-inner{padding:24px;}
+.modal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+.modal-head h3{font-size:19px;}
+.close-x{width:34px; height:34px; border-radius:12px; border:1px solid var(--border); background:var(--bg); display:flex; align-items:center; justify-content:center;}
+.mood-select{display:flex; gap:10px; justify-content:center; margin:14px 0;}
+.mood-opt{font-size:30px; padding:12px 16px; border-radius:16px; border:2px solid var(--border); background:var(--bg); opacity:.5; transition:all .2s;}
+.mood-opt.active{opacity:1; border-color:var(--blue); background:rgba(15,98,254,.1); transform:scale(1.08);}
+ 
+/* Toasts */
+#toastWrap{position:fixed; top:18px; left:0; right:0; display:flex; flex-direction:column; align-items:center; gap:10px; z-index:500; pointer-events:none;}
+.toast{
+  padding:13px 20px; border-radius:16px; font-size:13.5px; font-weight:700; color:#fff;
+  background:linear-gradient(135deg,#141926,#1e2436); box-shadow:var(--shadow-strong);
+  display:flex; align-items:center; gap:10px; animation:toastIn .35s cubic-bezier(.2,.9,.3,1) both;
+  max-width:88vw;
+}
+.toast.success{background:linear-gradient(135deg,#1c8a6f,#43AA8B);}
+.toast.error{background:linear-gradient(135deg,#c53437,#F94144);}
+.toast.info{background:linear-gradient(135deg,#0F62FE,#4C8DFE);}
+@keyframes toastIn{from{opacity:0; transform:translateY(-16px) scale(.94);} to{opacity:1; transform:translateY(0) scale(1);}}
+.toast.out{animation:toastOut .3s ease forwards;}
+@keyframes toastOut{to{opacity:0; transform:translateY(-14px) scale(.94);}}
+ 
+/* Onboarding */
+.onb-slide{text-align:center; padding:10px 6px 20px;}
+.onb-ic{width:76px; height:76px; border-radius:24px; margin:0 auto 18px; display:flex; align-items:center; justify-content:center; font-size:34px; background:linear-gradient(135deg, var(--blue), var(--blue-2));}
+.onb-dots{display:flex; gap:6px; justify-content:center; margin:16px 0;}
+.onb-dot{width:7px; height:7px; border-radius:50%; background:var(--border);}
+.onb-dot.active{background:var(--blue); width:20px; border-radius:6px;}
+ 
+/* Settings */
+.settings-row{display:flex; align-items:center; justify-content:space-between; padding:14px 4px; border-bottom:1px solid var(--border);}
+.settings-row:last-child{border-bottom:none;}
+.settings-row b{font-size:14.5px; font-weight:700;}
+.lang-opts,.theme-opts{display:flex; gap:8px;}
+.opt-btn{padding:8px 12px; border-radius:11px; border:1.5px solid var(--border); font-size:12.5px; font-weight:700; color:var(--text-dim);}
+.opt-btn.active{background:var(--blue); border-color:var(--blue); color:#fff;}
+ 
+/* Export card canvas preview */
+.export-preview{width:100%; border-radius:20px; margin:14px 0; box-shadow:var(--shadow-strong);}
+ 
+::-webkit-scrollbar{width:0; height:0;}
+ 
+@media (max-width:400px){
+  .stat-pills{gap:6px;}
+  .badges-grid{grid-template-columns:repeat(3,1fr);}
+}
+</style>
+</head>
+<body>
+ 
+<div id="toastWrap"></div>
+ 
+<!-- ============================================================
+     AUTH SCREEN
+============================================================ -->
+<div id="authScreen">
+  <div class="auth-wrap fade-up">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 4.5C4 3.6 4.7 3 5.5 3H11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H5.5A1.5 1.5 0 0 1 4 19.5V4.5Z" fill="#fff" opacity=".95"/><path d="M20 4.5C20 3.6 19.3 3 18.5 3H13a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h5.5a1.5 1.5 0 0 0 1.5-1.5V4.5Z" fill="#fff" opacity=".7"/></svg>
+      </div>
+      <h1>Oqýlyq</h1>
+      <p id="sloganText">Oqýlyq для чтения книг</p>
+    </div>
+ 
+    <div class="glass auth-card">
+      <div class="tabs">
+        <button class="tab-btn active" data-authtab="login" id="tabLoginBtn">Войти</button>
+        <button class="tab-btn" data-authtab="register" id="tabRegisterBtn">Регистрация</button>
+      </div>
+ 
+      <!-- LOGIN -->
+      <form id="loginForm">
+        <div class="field">
+          <label>Email или телефон</label>
+          <input type="text" id="loginContact" autocomplete="username" required>
+          <div class="err"></div>
+        </div>
+        <div class="field">
+          <label>Пароль</label>
+          <input type="password" id="loginPassword" autocomplete="current-password" required>
+          <div class="err"></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Войти</button>
+      </form>
+ 
+      <!-- REGISTER -->
+      <form id="registerForm" class="hidden">
+        <div class="auth-toggle">
+          <button type="button" class="chip-toggle active" data-regmode="email">Email</button>
+          <button type="button" class="chip-toggle" data-regmode="phone">Телефон</button>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Имя</label>
+            <input type="text" id="regFirstName" required>
+            <div class="err"></div>
+          </div>
+          <div class="field">
+            <label>Фамилия</label>
+            <input type="text" id="regLastName" required>
+            <div class="err"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label id="regContactLabel">Email</label>
+          <input type="text" id="regContact" required>
+          <div class="err"></div>
+        </div>
+        <div class="field">
+          <label>Пароль</label>
+          <input type="password" id="regPassword" required>
+          <div class="err"></div>
+        </div>
+        <div class="field">
+          <label>Повторить пароль</label>
+          <input type="password" id="regPassword2" required>
+          <div class="err"></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Зарегистрироваться</button>
+      </form>
+    </div>
+  </div>
+</div>
+ 
+<!-- ============================================================
+     APP SHELL
+============================================================ -->
+<div id="appShell">
+  <header class="app-header">
+    <div class="header-user">
+      <div class="avatar" id="headerAvatar">A</div>
+      <div>
+        <h3 id="headerName">—</h3>
+        <span id="headerStreak">🔥 0 дней подряд</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" id="themeToggleBtn" aria-label="Тема">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+      </button>
+      <button class="btn-icon" id="settingsBtn" aria-label="Настройки">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1Z"/></svg>
+      </button>
+    </div>
+  </header>
+ 
+  <main class="container">
+ 
+    <!-- HOME -->
+    <section class="screen-section active" id="screen-home">
+      <div class="stat-pills fade-up">
+        <div class="glass stat-pill"><b id="pillPages">0</b><span>Страниц</span></div>
+        <div class="glass stat-pill"><b id="pillHours">0ч</b><span>Время чтения</span></div>
+        <div class="glass stat-pill"><b id="pillStreak">0</b><span>Серия дней</span></div>
+      </div>
+ 
+      <div class="glass cta-card fade-up">
+        <div class="cta-glow"></div>
+        <h2 id="ctaTitle">Готовы читать?</h2>
+        <p id="ctaSub">Нажмите, чтобы начать сессию чтения</p>
+        <button class="btn btn-primary btn-lg" id="startReadingBtn" style="min-width:220px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+          Начать чтение
+        </button>
+      </div>
+ 
+      <div class="sec-title"><h3>Лента активности</h3><a data-nav="history">Вся история →</a></div>
+      <div id="homeFeed"></div>
+    </section>
+ 
+    <!-- HISTORY -->
+    <section class="screen-section" id="screen-history">
+      <div class="glass search-bar fade-up">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="historySearch" placeholder="Поиск по книгам, авторам, заметкам...">
+      </div>
+      <div class="filter-row">
+        <button class="filter-chip active" data-sort="date">По дате</button>
+        <button class="filter-chip" data-sort="pages">По страницам</button>
+        <button class="filter-chip" data-sort="pace">По темпу</button>
+        <button class="filter-chip" data-sort="duration">По времени</button>
+      </div>
+      <div id="historyList"></div>
+    </section>
+ 
+    <!-- STATS -->
+    <section class="screen-section" id="screen-stats">
+      <h3 class="mt-16">Статистика</h3>
+      <div class="stats-grid" id="statsGrid"></div>
+ 
+      <div class="glass chart-card">
+        <div class="flex between" style="align-items:center;">
+          <h4 style="font-size:15px;">Страницы по периодам</h4>
+          <div class="chart-tabs">
+            <button class="filter-chip active" data-period="day">Дни</button>
+            <button class="filter-chip" data-period="week">Недели</button>
+            <button class="filter-chip" data-period="month">Месяцы</button>
+          </div>
+        </div>
+        <canvas class="chart" id="pagesChart"></canvas>
+      </div>
+ 
+      <div class="glass chart-card">
+        <h4 style="font-size:15px; margin-bottom:10px;">Календарь активности</h4>
+        <div class="calendar-wrap"><div class="cal-grid" id="calGrid"></div></div>
+      </div>
+    </section>
+ 
+    <!-- GROUPS -->
+    <section class="screen-section" id="screen-groups">
+      <div class="flex between" style="align-items:center; margin:16px 0;">
+        <h3>Группы</h3>
+        <div class="flex gap-8">
+          <button class="btn btn-secondary" id="joinGroupBtn" style="padding:10px 14px; font-size:13px;">Вступить</button>
+          <button class="btn btn-primary" id="createGroupBtn" style="padding:10px 14px; font-size:13px;">+ Создать</button>
+        </div>
+      </div>
+      <div id="groupsList"></div>
+ 
+      <div class="sec-title"><h3>Рейтинг</h3></div>
+      <div class="filter-row">
+        <button class="filter-chip active" data-lb="pages">Страницы</button>
+        <button class="filter-chip" data-lb="time">Время</button>
+        <button class="filter-chip" data-lb="books">Книги</button>
+        <button class="filter-chip" data-lb="streak">Серия</button>
+      </div>
+      <div id="leaderboardList"></div>
+    </section>
+ 
+    <!-- PROFILE -->
+    <section class="screen-section" id="screen-profile">
+      <div class="glass profile-head fade-up">
+        <div class="avatar profile-avatar" id="profileAvatar" style="margin:0 auto;">A</div>
+        <h3 id="profileName" style="font-size:20px;">—</h3>
+        <p class="muted" id="profileLevel">Уровень 1</p>
+        <div class="level-bar-wrap"><div class="level-bar" id="levelBar" style="width:0%"></div></div>
+        <p class="faint" style="font-size:12px; margin-top:6px;" id="xpText">0 / 100 XP</p>
+      </div>
+ 
+      <div class="stats-grid mt-16">
+        <div class="glass"><b id="pfBooks">0</b><span>Книг</span></div>
+        <div class="glass"><b id="pfPages">0</b><span>Страниц</span></div>
+        <div class="glass"><b id="pfHours">0</b><span>Часов</span></div>
+        <div class="glass"><b id="pfSessions">0</b><span>Сессий</span></div>
+      </div>
+ 
+      <div class="sec-title"><h3>Достижения</h3></div>
+      <div class="badges-grid" id="badgesGrid"></div>
+ 
+      <button class="btn btn-ghost btn-block mt-24" id="logoutBtn">Выйти из аккаунта</button>
+    </section>
+ 
+  </main>
+ 
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span>Главная</span></button>
+    <button class="nav-btn" data-nav="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span>История</span></button>
+    <button class="nav-btn" data-nav="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/></svg><span>Статистика</span></button>
+    <button class="nav-btn" data-nav="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/><circle cx="17" cy="9" r="2.4"/><path d="M22 20c0-2.6-2-4.7-4.6-5.5"/></svg><span>Группы</span></button>
+    <button class="nav-btn" data-nav="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span>Профиль</span></button>
+  </nav>
+</div>
+ 
+<!-- ============================================================
+     TIMER SCREEN
+============================================================ -->
+<div id="timerScreen">
+  <button class="btn-icon" id="timerCloseBtn" style="position:absolute; top:22px; left:22px;" aria-label="Закрыть">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 6 12 12M18 6 6 18"/></svg>
+  </button>
+  <p class="timer-book-title">Сессия чтения</p>
+  <div class="timer-ring-wrap pulse" id="timerRingWrap">
+    <svg viewBox="0 0 280 280">
+      <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#0F62FE"/><stop offset="100%" stop-color="#4CC9F0"/>
+      </linearGradient></defs>
+      <circle class="timer-ring-bg" cx="140" cy="140" r="128"/>
+      <circle class="timer-ring-fg" id="timerRing" cx="140" cy="140" r="128" stroke-dasharray="804" stroke-dashoffset="0"/>
+    </svg>
+    <div class="timer-display">
+      <div class="timer-time" id="timerTime">00:00:00</div>
+      <div class="timer-label" id="timerStateLabel">Готово</div>
+    </div>
+  </div>
+  <div class="timer-controls">
+    <button class="timer-btn btn-secondary" id="timerPauseBtn" aria-label="Пауза" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+    </button>
+    <button class="timer-btn btn-primary" id="timerStartBtn" aria-label="Старт">
+      <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="7 4 21 12 7 20 7 4"/></svg>
+    </button>
+    <button class="timer-btn btn-danger" id="timerFinishBtn" aria-label="Завершить" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+    </button>
+  </div>
+</div>
+ 
+<!-- ============================================================
+     MODALS (dialog)
+============================================================ -->
+<dialog class="modal" id="sessionModal">
+  <div class="modal-inner">
+    <div class="modal-head"><h3>Завершение сессии</h3><button class="close-x" data-close="sessionModal">✕</button></div>
+    <form id="sessionForm">
+      <div class="field"><label>Название книги</label><input type="text" id="sBook" required><div class="err"></div></div>
+      <div class="row-2">
+        <div class="field"><label>Автор</label><input type="text" id="sAuthor" required><div class="err"></div></div>
+        <div class="field"><label>Жанр (необязательно)</label><input type="text" id="sGenre"></div>
+      </div>
+      <div class="field"><label>Страниц прочитано</label><input type="number" min="1" id="sPages" required><div class="err"></div></div>
+      <label style="font-size:13px; font-weight:600; color:var(--text-dim);">Настроение после чтения</label>
+      <div class="mood-select">
+        <button type="button" class="mood-opt" data-mood="😀">😀</button>
+        <button type="button" class="mood-opt" data-mood="😐">😐</button>
+        <button type="button" class="mood-opt" data-mood="😔">😔</button>
+      </div>
+      <div class="field"><label>Комментарий (необязательно)</label><textarea id="sComment" rows="2"></textarea></div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Сохранить сессию</button>
+    </form>
+  </div>
+</dialog>
+ 
+<dialog class="modal" id="shareModal">
+  <div class="modal-inner">
+    <div class="modal-head"><h3>Карточка результата</h3><button class="close-x" data-close="shareModal">✕</button></div>
+    <canvas id="shareCanvas" width="1080" height="1920" style="display:none;"></canvas>
+    <img id="sharePreviewImg" class="export-preview" alt="Карточка результата">
+    <button class="btn btn-primary btn-block" id="downloadPngBtn">Скачать PNG</button>
+  </div>
+</dialog>
+ 
+<dialog class="modal" id="createGroupModal">
+  <div class="modal-inner">
+    <div class="modal-head"><h3>Новая группа</h3><button class="close-x" data-close="createGroupModal">✕</button></div>
+    <form id="createGroupForm">
+      <div class="field"><label>Название</label><input type="text" id="gName" required></div>
+      <div class="field"><label>Описание</label><textarea id="gDesc" rows="2"></textarea></div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Создать группу</button>
+    </form>
+  </div>
+</dialog>
+ 
+<dialog class="modal" id="joinGroupModal">
+  <div class="modal-inner">
+    <div class="modal-head"><h3>Вступить в группу</h3><button class="close-x" data-close="joinGroupModal">✕</button></div>
+    <form id="joinGroupForm">
+      <div class="field"><label>Код приглашения</label><input type="text" id="gCode" required></div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Вступить</button>
+    </form>
+  </div>
+</dialog>
+ 
+<dialog class="modal" id="confirmModal">
+  <div class="modal-inner">
+    <div class="modal-head"><h3 id="confirmTitle">Подтвердите действие</h3><button class="close-x" data-close="confirmModal">✕</button></div>
+    <p class="muted" id="confirmText">Вы уверены?</p>
+    <div class="flex gap-12 mt-24">
+      <button class="btn btn-secondary btn-block" data-close="confirmModal">Отмена</button>
+      <button class="btn btn-danger btn-block" id="confirmYesBtn">Да, продолжить</button>
+    </div>
+  </div>
+</dialog>
+ 
+<dialog class="modal" id="settingsModal">
+  <div class="modal-inner">
+    <div class="modal-head"><h3>Настройки</h3><button class="close-x" data-close="settingsModal">✕</button></div>
+    <div class="settings-row"><b>Тема</b><div class="theme-opts"><button class="opt-btn" data-theme-opt="light">Светлая</button><button class="opt-btn" data-theme-opt="dark">Тёмная</button></div></div>
+    <div class="settings-row"><b>Язык</b><div class="lang-opts">
+      <button class="opt-btn" data-lang-opt="ru">RU</button>
+      <button class="opt-btn" data-lang-opt="kk">ҚАЗ</button>
+      <button class="opt-btn" data-lang-opt="en">EN</button>
+    </div></div>
+    <div class="settings-row"><b>Экспорт данных</b><button class="btn btn-secondary" id="exportDataBtn" style="padding:9px 14px; font-size:13px;">Экспорт</button></div>
+    <div class="settings-row"><b>Импорт данных</b><label class="btn btn-secondary" style="padding:9px 14px; font-size:13px;">Импорт<input type="file" id="importDataInput" accept=".json" style="display:none;"></label></div>
+    <div class="settings-row"><b>Очистить все данные</b><button class="btn btn-danger" id="clearDataBtn" style="padding:9px 14px; font-size:13px;">Очистить</button></div>
+  </div>
+</dialog>
+ 
+<dialog class="modal" id="onboardingModal">
+  <div class="modal-inner" id="onboardingBody"></div>
+</dialog>
+ 
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+(() => {
+"use strict";
+ 
+/* ============================================================
+   UTILS
+============================================================ */
+class Utils {
+  static uid(){ return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2,9); }
+  static clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+  static fmtHMS(totalSec){
+    totalSec = Math.max(0, Math.floor(totalSec));
+    const h = String(Math.floor(totalSec/3600)).padStart(2,'0');
+    const m = String(Math.floor((totalSec%3600)/60)).padStart(2,'0');
+    const s = String(totalSec%60).padStart(2,'0');
+    return `${h}:${m}:${s}`;
+  }
+  static fmtHoursShort(totalSec){
+    const h = totalSec/3600;
+    if(h < 1) return Math.round(totalSec/60)+'м';
+    return h.toFixed(1)+'ч';
+  }
+  static fmtDate(iso, lang){
+    const d = new Date(iso);
+    const locales = {ru:'ru-RU', kk:'kk-KZ', en:'en-US'};
+    return d.toLocaleDateString(locales[lang]||'ru-RU', {day:'numeric', month:'short', year:'numeric'});
+  }
+  static dayKey(iso){ return new Date(iso).toISOString().slice(0,10); }
+  static initials(first,last){ return ((first?.[0]||'')+(last?.[0]||'')).toUpperCase() || 'U'; }
+  static hashColor(str){
+    const palette = ['#0F62FE','#4CC9F0','#43AA8B','#F9C74F','#F94144','#9B5DE5'];
+    let h=0; for(const c of (str||'x')) h = (h*31 + c.charCodeAt(0)) % 997;
+    return palette[h % palette.length];
+  }
+  static escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  static download(filename, dataUrlOrBlobUrl){
+    const a = document.createElement('a');
+    a.href = dataUrlOrBlobUrl; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+}
+ 
+/* ============================================================
+   STORAGE MANAGER
+============================================================ */
+class StorageManager {
+  static KEYS = {
+    users:'oqylyq_users', currentUserId:'oqylyq_currentUserId', sessions:'oqylyq_sessions',
+    groups:'oqylyq_groups', settings:'oqylyq_settings', achievements:'oqylyq_achievements',
+    onboarded:'oqylyq_onboarded'
+  };
+  static get(key, fallback){
+    try{ const raw = localStorage.getItem(key); return raw===null ? fallback : JSON.parse(raw); }
+    catch(e){ return fallback; }
+  }
+  static set(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+  static remove(key){ localStorage.removeItem(key); }
+ 
+  static getUsers(){ return this.get(this.KEYS.users, []); }
+  static setUsers(u){ this.set(this.KEYS.users, u); }
+  static getSessions(){ return this.get(this.KEYS.sessions, []); }
+  static setSessions(s){ this.set(this.KEYS.sessions, s); }
+  static getGroups(){ return this.get(this.KEYS.groups, []); }
+  static setGroups(g){ this.set(this.KEYS.groups, g); }
+  static getSettings(){ return this.get(this.KEYS.settings, {theme:'light', lang:'ru'}); }
+  static setSettings(s){ this.set(this.KEYS.settings, s); }
+  static getAchievements(){ return this.get(this.KEYS.achievements, {}); }
+  static setAchievements(a){ this.set(this.KEYS.achievements, a); }
+ 
+  static exportAll(){
+    const data = {};
+    Object.values(this.KEYS).forEach(k => data[k] = this.get(k, null));
+    return data;
+  }
+  static importAll(data){
+    Object.entries(data).forEach(([k,v]) => { if(v!==null && v!==undefined) this.set(k, v); });
+  }
+  static clearAll(){ Object.values(this.KEYS).forEach(k => this.remove(k)); }
+}
+ 
+/* ============================================================
+   I18N
+============================================================ */
+const I18N = {
+  ru:{ slogan:'Oqýlyq для чтения книг', ready:'Готовы читать?', readySub:'Нажмите, чтобы начать сессию чтения',
+       pages:'Страниц', hours:'Время чтения', streakLbl:'Серия дней' },
+  kk:{ slogan:'Oqýlyq — кітап оқу үшін', ready:'Оқуға дайынсыз ба?', readySub:'Оқу сеансын бастау үшін басыңыз',
+       pages:'Беттер', hours:'Оқу уақыты', streakLbl:'Күндер сериясы' },
+  en:{ slogan:'Oqýlyq for reading books', ready:'Ready to read?', readySub:'Tap to start a reading session',
+       pages:'Pages', hours:'Reading time', streakLbl:'Day streak' }
+};
+ 
+/* ============================================================
+   TOAST
+============================================================ */
+class Toast {
+  static show(msg, type='info', icon=''){
+    const wrap = document.getElementById('toastWrap');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `<span>${icon}</span><span>${Utils.escapeHtml(msg)}</span>`;
+    wrap.appendChild(el);
+    setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(), 300); }, 2800);
+  }
+}
+ 
+/* ============================================================
+   MODAL
+============================================================ */
+class Modal {
+  static open(id){ document.getElementById(id).showModal(); }
+  static close(id){ document.getElementById(id).close(); }
+}
+document.querySelectorAll('[data-close]').forEach(btn=>{
+  btn.addEventListener('click', ()=> Modal.close(btn.dataset.close));
+});
+document.querySelectorAll('dialog.modal').forEach(dlg=>{
+  dlg.addEventListener('click', e=>{ if(e.target === dlg) dlg.close(); });
+});
+ 
+/* ============================================================
+   ANIMATION ENGINE (ripple + fade utility)
+============================================================ */
+class AnimationEngine {
+  static init(){
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.btn, .btn-icon, .mini-btn, .nav-btn, .filter-chip, .tab-btn, .mood-opt, .opt-btn, .chip-toggle, .timer-btn');
+      if(!btn) return;
+      const rect = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      const size = Math.max(rect.width, rect.height);
+      ripple.className = 'ripple';
+      ripple.style.width = ripple.style.height = size+'px';
+      ripple.style.left = (e.clientX - rect.left - size/2)+'px';
+      ripple.style.top = (e.clientY - rect.top - size/2)+'px';
+      if(getComputedStyle(btn).position === 'static') btn.style.position='relative';
+      btn.style.overflow = 'hidden';
+      btn.appendChild(ripple);
+      setTimeout(()=>ripple.remove(), 650);
+    });
+  }
+  static fadeUpAll(container){
+    container.querySelectorAll('.fade-up-item').forEach((el,i)=>{
+      el.style.animationDelay = (i*45)+'ms';
+    });
+  }
+}
+ 
+/* ============================================================
+   THEME MANAGER
+============================================================ */
+class ThemeManager {
+  static apply(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+    const s = StorageManager.getSettings(); s.theme = theme; StorageManager.setSettings(s);
+    document.querySelectorAll('[data-theme-opt]').forEach(b=>b.classList.toggle('active', b.dataset.themeOpt===theme));
+  }
+  static toggle(){
+    const cur = document.documentElement.getAttribute('data-theme') || 'light';
+    this.apply(cur === 'light' ? 'dark' : 'light');
+  }
+  static init(){ this.apply(StorageManager.getSettings().theme || 'light'); }
+}
+ 
+/* ============================================================
+   AUTH MANAGER
+============================================================ */
+class AuthManager {
+  static register({firstName,lastName,contact,password}){
+    const users = StorageManager.getUsers();
+    if(users.some(u=>u.contact.toLowerCase() === contact.toLowerCase())){
+      throw new Error('Пользователь с такими данными уже существует');
+    }
+    const user = {
+      id: Utils.uid(), firstName, lastName, contact, password,
+      color: Utils.hashColor(contact), createdAt: new Date().toISOString()
+    };
+    users.push(user);
+    StorageManager.setUsers(users);
+    StorageManager.set(StorageManager.KEYS.currentUserId, user.id);
+    return user;
+  }
+  static login(contact, password){
+    const users = StorageManager.getUsers();
+    const user = users.find(u=>u.contact.toLowerCase() === contact.toLowerCase() && u.password === password);
+    if(!user) throw new Error('Неверный логин или пароль');
+    StorageManager.set(StorageManager.KEYS.currentUserId, user.id);
+    return user;
+  }
+  static logout(){ StorageManager.remove(StorageManager.KEYS.currentUserId); }
+  static currentUser(){
+    const id = StorageManager.get(StorageManager.KEYS.currentUserId, null);
+    if(!id) return null;
+    return StorageManager.getUsers().find(u=>u.id===id) || null;
+  }
+}
+ 
+/* ============================================================
+   READING SESSION helpers / calculations
+============================================================ */
+class ReadingSession {
+  static create({userId, book, author, genre, pages, durationSec, mood, comment}){
+    const hours = durationSec/3600;
+    const pace = hours>0 ? Math.round(pages/hours) : pages;
+    return {
+      id: Utils.uid(), userId, book, author, genre: genre||'', pages: Number(pages),
+      durationSec: Math.round(durationSec), mood, comment: comment||'',
+      pace, date: new Date().toISOString(), likes:0, likedByMe:false
+    };
+  }
+  static userSessions(userId){
+    return StorageManager.getSessions().filter(s=>s.userId===userId);
+  }
+}
+ 
+/* ============================================================
+   TIMER
+============================================================ */
+class Timer {
+  constructor(){
+    this.startTs = null; this.elapsed = 0; this.running = false; this.raf = null;
+    this.onTick = null;
+  }
+  start(){
+    if(this.running) return;
+    this.running = true; this.startTs = performance.now() - this.elapsed*1000;
+    this._loop();
+  }
+  pause(){
+    if(!this.running) return;
+    this.running = false;
+    cancelAnimationFrame(this.raf);
+  }
+  reset(){ this.pause(); this.elapsed = 0; this.startTs = null; }
+  _loop(){
+    if(!this.running) return;
+    this.elapsed = (performance.now() - this.startTs)/1000;
+    if(this.onTick) this.onTick(this.elapsed);
+    this.raf = requestAnimationFrame(()=>this._loop());
+  }
+}
+ 
+/* ============================================================
+   STATISTICS MANAGER
+============================================================ */
+class StatisticsManager {
+  static forUser(userId){
+    const sessions = ReadingSession.userSessions(userId);
+    const totalPages = sessions.reduce((a,s)=>a+s.pages,0);
+    const totalSec = sessions.reduce((a,s)=>a+s.durationSec,0);
+    const totalBooks = new Set(sessions.map(s=>s.book.trim().toLowerCase())).size;
+    const avgPages = sessions.length ? Math.round(totalPages/sessions.length) : 0;
+    const avgSessionSec = sessions.length ? totalSec/sessions.length : 0;
+    const longestSession = sessions.reduce((m,s)=>Math.max(m,s.durationSec),0);
+    const pagesPerHour = totalSec>0 ? Math.round(totalPages/(totalSec/3600)) : 0;
+ 
+    // best day (most pages in a single day)
+    const byDay = {};
+    sessions.forEach(s=>{ const k=Utils.dayKey(s.date); byDay[k]=(byDay[k]||0)+s.pages; });
+    let bestDay = null, bestDayPages = 0;
+    Object.entries(byDay).forEach(([k,v])=>{ if(v>bestDayPages){bestDayPages=v; bestDay=k;} });
+ 
+    // favorite author / genre
+    const authorCount = {}, genreCount = {};
+    sessions.forEach(s=>{
+      if(s.author){ authorCount[s.author] = (authorCount[s.author]||0)+1; }
+      if(s.genre){ genreCount[s.genre] = (genreCount[s.genre]||0)+1; }
+    });
+    const favoriteAuthor = Object.entries(authorCount).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
+    const favoriteGenre = Object.entries(genreCount).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
+ 
+    return {
+      totalPages, totalSec, totalBooks, avgPages, avgSessionSec, longestSession,
+      pagesPerHour, bestDay, bestDayPages, favoriteAuthor, favoriteGenre, sessionsCount: sessions.length,
+      streak: this.streak(userId)
+    };
+  }
+  static streak(userId){
+    const sessions = ReadingSession.userSessions(userId);
+    if(!sessions.length) return 0;
+    const days = new Set(sessions.map(s=>Utils.dayKey(s.date)));
+    let streak = 0;
+    let cursor = new Date();
+    // if no session today, check if yesterday had one to keep streak alive at 0 baseline
+    for(let i=0;i<3650;i++){
+      const key = cursor.toISOString().slice(0,10);
+      if(days.has(key)){ streak++; cursor.setDate(cursor.getDate()-1); }
+      else if(i===0){ cursor.setDate(cursor.getDate()-1); continue; } // allow today to be empty
+      else break;
+    }
+    return streak;
+  }
+  static xp(userId){ return ReadingSession.userSessions(userId).reduce((a,s)=>a+s.pages,0); }
+  static level(userId){
+    const xp = this.xp(userId);
+    const level = Math.floor(xp/100)+1;
+    const inLevel = xp % 100;
+    return {level, xp, inLevel, pct: inLevel};
+  }
+  static periodSeries(userId, period){
+    const sessions = ReadingSession.userSessions(userId);
+    const buckets = {};
+    sessions.forEach(s=>{
+      const d = new Date(s.date);
+      let key;
+      if(period==='day'){ key = d.toISOString().slice(0,10); }
+      else if(period==='week'){
+        const onejan = new Date(d.getFullYear(),0,1);
+        const week = Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
+        key = d.getFullYear()+'-W'+week;
+      } else { key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+      buckets[key] = (buckets[key]||0) + s.pages;
+    });
+    const keys = Object.keys(buckets).sort();
+    const lastN = keys.slice(-10);
+    return lastN.map(k=>({label:k.slice(5)||k, value:buckets[k]}));
+  }
+}
+ 
+/* ============================================================
+   ACHIEVEMENT MANAGER
+============================================================ */
+const ACHIEVEMENTS = [
+  {id:'first_book', icon:'📕', name:'Первая книга', check:(st)=> st.sessionsCount>=1},
+  {id:'p100', icon:'📖', name:'100 страниц', check:(st)=> st.totalPages>=100},
+  {id:'p500', icon:'📚', name:'500 страниц', check:(st)=> st.totalPages>=500},
+  {id:'p1000', icon:'🏆', name:'1000 страниц', check:(st)=> st.totalPages>=1000},
+  {id:'streak7', icon:'🔥', name:'7 дней подряд', check:(st)=> st.streak>=7},
+  {id:'streak30', icon:'⚡', name:'30 дней подряд', check:(st)=> st.streak>=30},
+  {id:'h100', icon:'⏳', name:'100 часов', check:(st)=> st.totalSec>=100*3600},
+  {id:'night', icon:'🌙', name:'Ночной читатель', check:(st,userId)=> ReadingSession.userSessions(userId).some(s=>{const h=new Date(s.date).getHours(); return h>=0&&h<5;})},
+  {id:'early', icon:'🌅', name:'Ранняя пташка', check:(st,userId)=> ReadingSession.userSessions(userId).some(s=>{const h=new Date(s.date).getHours(); return h>=5&&h<7;})},
+  {id:'marathon', icon:'🏃', name:'Марафонец', check:(st)=> st.longestSession>=3*3600},
+];
+class AchievementManager {
+  static unlocked(userId){ return StorageManager.getAchievements()[userId] || []; }
+  static evaluate(userId){
+    const st = StatisticsManager.forUser(userId);
+    const all = StorageManager.getAchievements();
+    const cur = new Set(all[userId] || []);
+    const newly = [];
+    ACHIEVEMENTS.forEach(a=>{
+      if(!cur.has(a.id) && a.check(st, userId)){ cur.add(a.id); newly.push(a); }
+    });
+    all[userId] = Array.from(cur);
+    StorageManager.setAchievements(all);
+    return newly;
+  }
+}
+ 
+/* ============================================================
+   GROUP MANAGER
+============================================================ */
+class GroupManager {
+  static create(name, desc, userId){
+    const groups = StorageManager.getGroups();
+    const code = Math.random().toString(36).slice(2,8).toUpperCase();
+    const g = {id:Utils.uid(), name, description:desc, code, color:Utils.hashColor(name), memberIds:[userId], ownerId:userId};
+    groups.push(g); StorageManager.setGroups(groups); return g;
+  }
+  static join(code, userId){
+    const groups = StorageManager.getGroups();
+    const g = groups.find(g=>g.code.toLowerCase()===code.trim().toLowerCase());
+    if(!g) throw new Error('Группа с таким кодом не найдена');
+    if(!g.memberIds.includes(userId)) g.memberIds.push(userId);
+    StorageManager.setGroups(groups);
+    return g;
+  }
+  static leave(groupId, userId){
+    const groups = StorageManager.getGroups();
+    const g = groups.find(g=>g.id===groupId);
+    if(g) g.memberIds = g.memberIds.filter(id=>id!==userId);
+    StorageManager.setGroups(groups);
+  }
+  static forUser(userId){ return StorageManager.getGroups().filter(g=>g.memberIds.includes(userId)); }
+}
+ 
+/* ============================================================
+   LEADERBOARD
+============================================================ */
+class Leaderboard {
+  static rows(sortBy='pages'){
+    const users = StorageManager.getUsers();
+    const rows = users.map(u=>{
+      const st = StatisticsManager.forUser(u.id);
+      return {user:u, pages:st.totalPages, time:st.totalSec, books:st.totalBooks, streak:st.streak};
+    });
+    const key = {pages:'pages', time:'time', books:'books', streak:'streak'}[sortBy] || 'pages';
+    rows.sort((a,b)=>b[key]-a[key]);
+    return rows;
+  }
+}
+ 
+/* ============================================================
+   CANVAS EXPORTER — shareable result card
+============================================================ */
+class CanvasExporter {
+  static render(session, user){
+    const canvas = document.getElementById('shareCanvas');
+    const ctx = canvas.getContext('2d');
+    const W=1080, H=1920;
+    // gradient bg
+    const grad = ctx.createLinearGradient(0,0,W,H);
+    grad.addColorStop(0,'#0F62FE'); grad.addColorStop(.55,'#123a8f'); grad.addColorStop(1,'#0A0E17');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+ 
+    // decorative circles
+    ctx.fillStyle='rgba(76,201,240,.25)';
+    ctx.beginPath(); ctx.arc(W-100,120,260,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.06)';
+    ctx.beginPath(); ctx.arc(80,H-200,320,0,Math.PI*2); ctx.fill();
+ 
+    // logo + name
+    ctx.fillStyle='#fff'; ctx.font='800 54px Sora, sans-serif';
+    ctx.fillText('Oqýlyq', 70, 120);
+    ctx.font='500 26px Manrope, sans-serif'; ctx.fillStyle='rgba(255,255,255,.75)';
+    ctx.fillText('для чтения книг', 70, 160);
+ 
+    // avatar circle
+    ctx.beginPath(); ctx.arc(140, 320, 70, 0, Math.PI*2); ctx.fillStyle=user.color; ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='800 52px Sora, sans-serif'; ctx.textAlign='center';
+    ctx.fillText(Utils.initials(user.firstName,user.lastName), 140, 338);
+    ctx.textAlign='left';
+    ctx.font='700 34px Manrope, sans-serif'; ctx.fillStyle='#fff';
+    ctx.fillText(user.firstName+' '+user.lastName, 240, 300);
+    ctx.font='500 24px Manrope, sans-serif'; ctx.fillStyle='rgba(255,255,255,.7)';
+    ctx.fillText(Utils.fmtDate(session.date,'ru'), 240, 340);
+ 
+    // book title block
+    ctx.font='800 46px Sora, sans-serif'; ctx.fillStyle='#fff';
+    this.wrapText(ctx, session.book, 70, 470, W-140, 56);
+    ctx.font='500 30px Manrope, sans-serif'; ctx.fillStyle='rgba(255,255,255,.75)';
+    ctx.fillText(session.author, 70, 545);
+ 
+    // stats row
+    const stats = [
+      {label:'Страниц', val:session.pages},
+      {label:'Время', val:Utils.fmtHMS(session.durationSec)},
+      {label:'Темп', val:session.pace+'/ч'}
+    ];
+    const boxW=(W-140-2*30)/3;
+    stats.forEach((s,i)=>{
+      const x = 70 + i*(boxW+30);
+      const y = 650;
+      ctx.fillStyle='rgba(255,255,255,.1)';
+      this.roundRect(ctx, x, y, boxW, 190, 28); ctx.fill();
+      ctx.fillStyle='#fff'; ctx.font='800 56px Sora, sans-serif'; ctx.textAlign='center';
+      ctx.fillText(String(s.val), x+boxW/2, y+95);
+      ctx.font='600 24px Manrope, sans-serif'; ctx.fillStyle='rgba(255,255,255,.7)';
+      ctx.fillText(s.label, x+boxW/2, y+140);
+      ctx.textAlign='left';
+    });
+ 
+    // mood
+    ctx.font='90px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(session.mood||'😀', W/2, 1020);
+    ctx.textAlign='left';
+ 
+    // QR placeholder
+    const qrSize=200, qrX=W/2-qrSize/2, qrY=1550;
+    ctx.fillStyle='#fff'; this.roundRect(ctx, qrX, qrY, qrSize, qrSize, 20); ctx.fill();
+    ctx.fillStyle='#0F62FE'; ctx.font='700 18px Manrope, sans-serif'; ctx.textAlign='center';
+    ctx.fillText('QR', W/2, qrY+qrSize/2+7);
+    ctx.textAlign='left';
+ 
+    // footer
+    ctx.font='600 26px Manrope, sans-serif'; ctx.fillStyle='rgba(255,255,255,.55)'; ctx.textAlign='center';
+    ctx.fillText('oqylyq.app', W/2, 1830);
+    ctx.textAlign='left';
+ 
+    return canvas.toDataURL('image/png');
+  }
+  static roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+  }
+  static wrapText(ctx, text, x, y, maxWidth, lineHeight){
+    const words = text.split(' '); let line=''; let curY=y; let lines=0;
+    for(const w of words){
+      const test = line+w+' ';
+      if(ctx.measureText(test).width > maxWidth && line !== '' && lines<2){
+        ctx.fillText(line, x, curY); line = w+' '; curY += lineHeight; lines++;
+      } else line = test;
+    }
+    ctx.fillText(line, x, curY);
+  }
+}
+ 
+/* ============================================================
+   APP / ROUTER / UI
+============================================================ */
+const App = {
+  timer: new Timer(),
+  currentUser: null,
+  historySortBy: 'date',
+  chartPeriod: 'day',
+  lbSortBy: 'pages',
+  selectedMood: '😀',
+  editingSessionId: null,
+ 
+  init(){
+    ThemeManager.init();
+    AnimationEngine.init();
+    this.bindAuthForms();
+    this.bindNav();
+    this.bindTimer();
+    this.bindSessionModal();
+    this.bindGroupsUI();
+    this.bindSettings();
+    this.bindHistoryControls();
+    this.bindStatsControls();
+ 
+    const user = AuthManager.currentUser();
+    if(user){ this.enterApp(user); } else { this.showAuth(); }
+  },
+ 
+  showAuth(){
+    document.getElementById('authScreen').style.display='flex';
+    document.getElementById('appShell').classList.remove('active');
+  },
+ 
+  enterApp(user){
+    this.currentUser = user;
+    document.getElementById('authScreen').style.display='none';
+    document.getElementById('appShell').classList.add('active');
+    this.refreshHeader();
+    this.renderHome();
+    this.maybeOnboard();
+  },
+ 
+  refreshHeader(){
+    const u = this.currentUser;
+    const st = StatisticsManager.forUser(u.id);
+    const av = document.getElementById('headerAvatar');
+    av.textContent = Utils.initials(u.firstName,u.lastName);
+    av.style.background = u.color;
+    document.getElementById('headerName').textContent = u.firstName+' '+u.lastName;
+    document.getElementById('headerStreak').textContent = `🔥 ${st.streak} дней подряд`;
+    document.getElementById('pillPages').textContent = st.totalPages;
+    document.getElementById('pillHours').textContent = Utils.fmtHoursShort(st.totalSec);
+    document.getElementById('pillStreak').textContent = st.streak;
+  },
+ 
+  /* ---------- AUTH ---------- */
+  bindAuthForms(){
+    document.getElementById('tabLoginBtn').addEventListener('click', ()=>this.switchAuthTab('login'));
+    document.getElementById('tabRegisterBtn').addEventListener('click', ()=>this.switchAuthTab('register'));
+ 
+    document.querySelectorAll('[data-regmode]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('[data-regmode]').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const mode = btn.dataset.regmode;
+        document.getElementById('regContactLabel').textContent = mode==='email' ? 'Email' : 'Номер телефона';
+        document.getElementById('regContact').type = mode==='email' ? 'email' : 'tel';
+        document.getElementById('regContact').placeholder = mode==='email' ? 'you@example.com' : '+7 700 000 00 00';
+      });
+    });
+ 
+    document.getElementById('loginForm').addEventListener('submit', e=>{
+      e.preventDefault();
+      this.clearErrors('loginForm');
+      const contact = document.getElementById('loginContact').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      try{
+        const user = AuthManager.login(contact, password);
+        Toast.show('Добро пожаловать, '+user.firstName+'!', 'success', '👋');
+        this.enterApp(user);
+      }catch(err){
+        this.setError('loginPassword', err.message);
+      }
+    });
+ 
+    document.getElementById('registerForm').addEventListener('submit', e=>{
+      e.preventDefault();
+      this.clearErrors('registerForm');
+      const firstName = document.getElementById('regFirstName').value.trim();
+      const lastName = document.getElementById('regLastName').value.trim();
+      const contact = document.getElementById('regContact').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const password2 = document.getElementById('regPassword2').value;
+      let ok = true;
+      if(!firstName){ this.setError('regFirstName','Введите имя'); ok=false; }
+      if(!lastName){ this.setError('regLastName','Введите фамилию'); ok=false; }
+      if(!contact || contact.length<3){ this.setError('regContact','Введите корректные данные'); ok=false; }
+      if(!password || password.length<4){ this.setError('regPassword','Минимум 4 символа'); ok=false; }
+      if(password !== password2){ this.setError('regPassword2','Пароли не совпадают'); ok=false; }
+      if(!ok) return;
+      try{
+        const user = AuthManager.register({firstName,lastName,contact,password});
+        Toast.show('Аккаунт создан! Добро пожаловать', 'success', '🎉');
+        this.enterApp(user);
+      }catch(err){
+        this.setError('regContact', err.message);
+      }
+    });
+  },
+  switchAuthTab(tab){
+    document.getElementById('tabLoginBtn').classList.toggle('active', tab==='login');
+    document.getElementById('tabRegisterBtn').classList.toggle('active', tab==='register');
+    document.getElementById('loginForm').classList.toggle('hidden', tab!=='login');
+    document.getElementById('registerForm').classList.toggle('hidden', tab!=='register');
+  },
+  setError(inputId, msg){
+    const input = document.getElementById(inputId);
+    const field = input.closest('.field');
+    field.classList.add('error');
+    field.querySelector('.err').textContent = msg;
+  },
+  clearErrors(formId){
+    document.getElementById(formId).querySelectorAll('.field').forEach(f=>{
+      f.classList.remove('error'); const e=f.querySelector('.err'); if(e) e.textContent='';
+    });
+  },
+ 
+  /* ---------- NAV / ROUTER ---------- */
+  bindNav(){
+    document.querySelectorAll('[data-nav]').forEach(btn=>{
+      btn.addEventListener('click', ()=> this.navigate(btn.dataset.nav));
+    });
+    document.getElementById('startReadingBtn').addEventListener('click', ()=> this.openTimer());
+    document.getElementById('logoutBtn').addEventListener('click', ()=>{
+      this.showConfirm('Выйти из аккаунта?', 'Вы сможете снова войти в любой момент.', ()=>{
+        AuthManager.logout(); this.currentUser=null; this.showAuth();
+        Toast.show('Вы вышли из аккаунта','info','👋');
+      });
+    });
+  },
+  navigate(name){
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.nav===name));
+    document.querySelectorAll('.screen-section').forEach(s=>s.classList.remove('active'));
+    const sec = document.getElementById('screen-'+name);
+    sec.classList.add('active');
+    if(name==='home') this.renderHome();
+    if(name==='history') this.renderHistory();
+    if(name==='stats') this.renderStats();
+    if(name==='groups') this.renderGroups();
+    if(name==='profile') this.renderProfile();
+  },
+ 
+  /* ---------- TIMER ---------- */
+  bindTimer(){
+    document.getElementById('timerStartBtn').addEventListener('click', ()=>{
+      this.timer.start();
+      document.getElementById('timerStartBtn').style.display='none';
+      document.getElementById('timerPauseBtn').style.display='flex';
+      document.getElementById('timerFinishBtn').style.display='flex';
+      document.getElementById('timerStateLabel').textContent='Идёт чтение';
+      document.getElementById('timerRingWrap').classList.add('pulse');
+    });
+    document.getElementById('timerPauseBtn').addEventListener('click', ()=>{
+      this.timer.pause();
+      document.getElementById('timerStartBtn').style.display='flex';
+      document.getElementById('timerPauseBtn').style.display='none';
+      document.getElementById('timerStateLabel').textContent='Пауза';
+      document.getElementById('timerRingWrap').classList.remove('pulse');
+    });
+    document.getElementById('timerFinishBtn').addEventListener('click', ()=>{
+      this.timer.pause();
+      this.pendingDurationSec = this.timer.elapsed;
+      document.getElementById('timerScreen').classList.remove('active');
+      this.editingSessionId = null;
+      document.getElementById('sessionForm').reset();
+      document.querySelectorAll('.mood-opt').forEach(m=>m.classList.remove('active'));
+      this.selectedMood='😀';
+      Modal.open('sessionModal');
+    });
+    document.getElementById('timerCloseBtn').addEventListener('click', ()=>{
+      if(this.timer.elapsed > 3){
+        this.showConfirm('Завершить чтение?', 'Прогресс текущей сессии будет потерян.', ()=>{
+          this.timer.reset(); document.getElementById('timerScreen').classList.remove('active');
+        });
+      } else {
+        this.timer.reset(); document.getElementById('timerScreen').classList.remove('active');
+      }
+    });
+    this.timer.onTick = (elapsed)=>{
+      document.getElementById('timerTime').textContent = Utils.fmtHMS(elapsed);
+      const circumference = 2*Math.PI*128;
+      const cycle = 3600; // visually loop ring every hour
+      const pct = (elapsed % cycle)/cycle;
+      document.getElementById('timerRing').style.strokeDashoffset = circumference*(1-pct);
+    };
+  },
+  openTimer(){
+    this.timer.reset();
+    document.getElementById('timerTime').textContent='00:00:00';
+    document.getElementById('timerStateLabel').textContent='Готово';
+    document.getElementById('timerStartBtn').style.display='flex';
+    document.getElementById('timerPauseBtn').style.display='none';
+    document.getElementById('timerFinishBtn').style.display='none';
+    document.getElementById('timerScreen').classList.add('active');
+  },
+ 
+  /* ---------- SESSION MODAL ---------- */
+  bindSessionModal(){
+    document.querySelectorAll('.mood-opt').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('.mood-opt').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active'); this.selectedMood = btn.dataset.mood;
+      });
+    });
+    document.getElementById('sessionForm').addEventListener('submit', e=>{
+      e.preventDefault();
+      this.clearErrors('sessionForm');
+      const book = document.getElementById('sBook').value.trim();
+      const author = document.getElementById('sAuthor').value.trim();
+      const genre = document.getElementById('sGenre').value.trim();
+      const pages = Number(document.getElementById('sPages').value);
+      const comment = document.getElementById('sComment').value.trim();
+      let ok=true;
+      if(!book){ this.setError('sBook','Введите название книги'); ok=false; }
+      if(!author){ this.setError('sAuthor','Введите автора'); ok=false; }
+      if(!pages || pages<1){ this.setError('sPages','Укажите количество страниц'); ok=false; }
+      if(!ok) return;
+ 
+      const durationSec = this.pendingDurationSec || 1;
+      const sessions = StorageManager.getSessions();
+      const session = ReadingSession.create({
+        userId:this.currentUser.id, book, author, genre, pages, durationSec,
+        mood:this.selectedMood, comment
+      });
+      sessions.push(session);
+      StorageManager.setSessions(sessions);
+      Modal.close('sessionModal');
+      Toast.show('Сессия сохранена','success','✅');
+ 
+      const newBadges = AchievementManager.evaluate(this.currentUser.id);
+      newBadges.forEach(b=> setTimeout(()=>Toast.show('Получен бейдж: '+b.name, 'success', b.icon), 400));
+ 
+      this.refreshHeader();
+      this.navigate('home');
+ 
+      // show shareable card
+      const imgData = CanvasExporter.render(session, this.currentUser);
+      document.getElementById('sharePreviewImg').src = imgData;
+      this._lastShareImg = imgData;
+      Modal.open('shareModal');
+    });
+    document.getElementById('downloadPngBtn').addEventListener('click', ()=>{
+      if(this._lastShareImg) Utils.download('oqylyq-session.png', this._lastShareImg);
+    });
+  },
+ 
+  /* ---------- HOME / FEED ---------- */
+  renderHome(){
+    this.refreshHeader();
+    const sessions = ReadingSession.userSessions(this.currentUser.id).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
+    const feed = document.getElementById('homeFeed');
+    if(!sessions.length){
+      feed.innerHTML = this.emptyState('📚','Пока нет активностей','Начните первую сессию чтения, чтобы увидеть её здесь.');
+      return;
+    }
+    feed.innerHTML = sessions.map(s=>this.activityCardHtml(s)).join('');
+    this.bindActivityCardEvents(feed);
+  },
+  emptyState(icon, title, sub){
+    return `<div class="glass empty-state fade-up"><div style="font-size:44px;">${icon}</div><h4>${title}</h4><p>${sub}</p></div>`;
+  },
+  activityCardHtml(s){
+    const u = this.currentUser;
+    return `<article class="glass activity-card fade-up" data-id="${s.id}">
+      <div class="book-cover" style="background:linear-gradient(135deg, ${u.color}, #4C8DFE);">📖</div>
+      <div class="activity-info">
+        <div class="activity-top">
+          <div><h4>${Utils.escapeHtml(s.book)}</h4><p>${Utils.escapeHtml(s.author)} · ${Utils.fmtDate(s.date, App.currentLang())}</p></div>
+          <div class="mood-badge">${s.mood}</div>
+        </div>
+        <div class="activity-meta">
+          <span class="meta-item"><b>${s.pages}</b> стр.</span>
+          <span class="meta-item"><b>${Utils.fmtHMS(s.durationSec)}</b></span>
+          <span class="meta-item"><b>${s.pace}</b>/ч</span>
+        </div>
+        ${s.comment ? `<p class="muted" style="font-size:12.5px; margin-top:8px;">"${Utils.escapeHtml(s.comment)}"</p>` : ''}
+        <div class="activity-actions">
+          <button class="mini-btn like-btn ${s.likedByMe?'liked':''}" data-id="${s.id}">❤ ${s.likes}</button>
+          <button class="mini-btn edit-btn" data-id="${s.id}">✏️ Изменить</button>
+          <button class="mini-btn del-btn" data-id="${s.id}">🗑 Удалить</button>
+        </div>
+      </div>
+    </article>`;
+  },
+  bindActivityCardEvents(container){
+    container.querySelectorAll('.like-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const sessions = StorageManager.getSessions();
+        const s = sessions.find(x=>x.id===btn.dataset.id);
+        if(!s) return;
+        s.likedByMe = !s.likedByMe; s.likes += s.likedByMe ? 1 : -1;
+        StorageManager.setSessions(sessions);
+        this.navigate(document.querySelector('.screen-section.active').id.replace('screen-',''));
+      });
+    });
+    container.querySelectorAll('.edit-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=> this.openEditSession(btn.dataset.id));
+    });
+    container.querySelectorAll('.del-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        this.showConfirm('Удалить запись?', 'Это действие нельзя отменить.', ()=>{
+          let sessions = StorageManager.getSessions();
+          sessions = sessions.filter(s=>s.id!==btn.dataset.id);
+          StorageManager.setSessions(sessions);
+          Toast.show('Запись удалена','info','🗑');
+          this.refreshHeader();
+          this.navigate(document.querySelector('.screen-section.active').id.replace('screen-',''));
+        });
+      });
+    });
+  },
+  openEditSession(id){
+    const s = StorageManager.getSessions().find(x=>x.id===id);
+    if(!s) return;
+    this.editingSessionId = id;
+    document.getElementById('sBook').value = s.book;
+    document.getElementById('sAuthor').value = s.author;
+    document.getElementById('sGenre').value = s.genre||'';
+    document.getElementById('sPages').value = s.pages;
+    document.getElementById('sComment').value = s.comment||'';
+    document.querySelectorAll('.mood-opt').forEach(m=>m.classList.toggle('active', m.dataset.mood===s.mood));
+    this.selectedMood = s.mood;
+    this.pendingDurationSec = s.durationSec;
+    // override submit to update instead of create — handled via editingSessionId flag
+    const form = document.getElementById('sessionForm');
+    const handler = (e)=>{
+      e.preventDefault(); e.stopImmediatePropagation();
+      const sessions = StorageManager.getSessions();
+      const target = sessions.find(x=>x.id===id);
+      target.book = document.getElementById('sBook').value.trim();
+      target.author = document.getElementById('sAuthor').value.trim();
+      target.genre = document.getElementById('sGenre').value.trim();
+      target.pages = Number(document.getElementById('sPages').value);
+      target.comment = document.getElementById('sComment').value.trim();
+      target.mood = this.selectedMood;
+      const hours = target.durationSec/3600;
+      target.pace = hours>0 ? Math.round(target.pages/hours) : target.pages;
+      StorageManager.setSessions(sessions);
+      Modal.close('sessionModal');
+      Toast.show('Данные обновлены','success','✅');
+      this.editingSessionId = null;
+      form.removeEventListener('submit', handler, true);
+      this.refreshHeader();
+      this.navigate(document.querySelector('.screen-section.active').id.replace('screen-',''));
+    };
+    form.addEventListener('submit', handler, true);
+    Modal.open('sessionModal');
+  },
+ 
+  /* ---------- HISTORY ---------- */
+  bindHistoryControls(){
+    document.getElementById('historySearch').addEventListener('input', ()=> this.renderHistory());
+    document.querySelectorAll('[data-sort]').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        document.querySelectorAll('[data-sort]').forEach(c=>c.classList.remove('active'));
+        chip.classList.add('active'); this.historySortBy = chip.dataset.sort; this.renderHistory();
+      });
+    });
+  },
+  renderHistory(){
+    const q = (document.getElementById('historySearch').value||'').toLowerCase();
+    let sessions = ReadingSession.userSessions(this.currentUser.id);
+    if(q) sessions = sessions.filter(s => s.book.toLowerCase().includes(q) || s.author.toLowerCase().includes(q) || (s.comment||'').toLowerCase().includes(q));
+    const sortMap = {date:(a,b)=>new Date(b.date)-new Date(a.date), pages:(a,b)=>b.pages-a.pages, pace:(a,b)=>b.pace-a.pace, duration:(a,b)=>b.durationSec-a.durationSec};
+    sessions.sort(sortMap[this.historySortBy] || sortMap.date);
+    const list = document.getElementById('historyList');
+    if(!sessions.length){ list.innerHTML = this.emptyState('🔍','Ничего не найдено','Попробуйте изменить запрос поиска.'); return; }
+    list.innerHTML = sessions.map(s=>this.activityCardHtml(s)).join('');
+    this.bindActivityCardEvents(list);
+  },
+ 
+  /* ---------- STATS ---------- */
+  bindStatsControls(){
+    document.querySelectorAll('[data-period]').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        document.querySelectorAll('[data-period]').forEach(c=>c.classList.remove('active'));
+        chip.classList.add('active'); this.chartPeriod = chip.dataset.period; this.drawPagesChart();
+      });
+    });
+  },
+  renderStats(){
+    const st = StatisticsManager.forUser(this.currentUser.id);
+    const grid = document.getElementById('statsGrid');
+    const cards = [
+      ['Всего книг', st.totalBooks], ['Всего страниц', st.totalPages],
+      ['Всего часов', (st.totalSec/3600).toFixed(1)], ['Лучший день', st.bestDay ? Utils.fmtDate(st.bestDay,this.currentLang())+` (${st.bestDayPages} стр.)` : '—'],
+      ['Средняя скорость', st.pagesPerHour+' стр/ч'], ['Любимый автор', st.favoriteAuthor],
+      ['Любимый жанр', st.favoriteGenre], ['Самый длинный марафон', Utils.fmtHMS(st.longestSession)]
+    ];
+    grid.innerHTML = cards.map(([label,val])=>`<div class="glass"><b>${val}</b><span>${label}</span></div>`).join('');
+    this.drawPagesChart();
+    this.drawCalendar();
+  },
+  drawPagesChart(){
+    const canvas = document.getElementById('pagesChart');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr; canvas.height = 180*dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr,dpr);
+    ctx.clearRect(0,0,rect.width,180);
+    const data = StatisticsManager.periodSeries(this.currentUser.id, this.chartPeriod);
+    if(!data.length){ ctx.fillStyle='#8B93A7'; ctx.font='13px Manrope'; ctx.fillText('Пока нет данных для графика', 10, 90); return; }
+    const max = Math.max(...data.map(d=>d.value), 1);
+    const barW = rect.width/data.length;
+    const isDark = document.documentElement.getAttribute('data-theme')==='dark';
+    data.forEach((d,i)=>{
+      const h = (d.value/max) * 130;
+      const x = i*barW + barW*0.22;
+      const w = barW*0.56;
+      const y = 150 - h;
+      const grad = ctx.createLinearGradient(0,y,0,150);
+      grad.addColorStop(0,'#4CC9F0'); grad.addColorStop(1,'#0F62FE');
+      ctx.fillStyle = grad;
+      const r = Math.min(8, w/2);
+      ctx.beginPath();
+      ctx.moveTo(x+r, y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+      ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = isDark ? '#A9B1C6' : '#5B6478';
+      ctx.font='10px Manrope'; ctx.textAlign='center';
+      ctx.fillText(d.label, x+w/2, 168);
+      ctx.textAlign='left';
+    });
+  },
+  drawCalendar(){
+    const cal = document.getElementById('calGrid');
+    const sessions = ReadingSession.userSessions(this.currentUser.id);
+    const byDay = {};
+    sessions.forEach(s=>{ const k=Utils.dayKey(s.date); byDay[k]=(byDay[k]||0)+s.pages; });
+    const days = [];
+    const today = new Date();
+    for(let i=90;i>=0;i--){
+      const d = new Date(today); d.setDate(d.getDate()-i);
+      const key = d.toISOString().slice(0,10);
+      days.push({key, val: byDay[key]||0});
+    }
+    const max = Math.max(...days.map(d=>d.val),1);
+    cal.innerHTML = days.map(d=>{
+      const intensity = d.val===0 ? 0 : Utils.clamp(Math.ceil((d.val/max)*4),1,4);
+      const colors = ['var(--border)','rgba(15,98,254,.28)','rgba(15,98,254,.52)','rgba(15,98,254,.76)','#0F62FE'];
+      return `<div class="cal-cell" title="${d.key}: ${d.val} стр." style="background:${colors[intensity]}"></div>`;
+    }).join('');
+  },
+  currentLang(){ return StorageManager.getSettings().lang || 'ru'; },
+ 
+  /* ---------- GROUPS ---------- */
+  bindGroupsUI(){
+    document.getElementById('createGroupBtn').addEventListener('click', ()=> Modal.open('createGroupModal'));
+    document.getElementById('joinGroupBtn').addEventListener('click', ()=> Modal.open('joinGroupModal'));
+    document.getElementById('createGroupForm').addEventListener('submit', e=>{
+      e.preventDefault();
+      const name = document.getElementById('gName').value.trim();
+      const desc = document.getElementById('gDesc').value.trim();
+      if(!name) return;
+      GroupManager.create(name, desc, this.currentUser.id);
+      Modal.close('createGroupModal'); e.target.reset();
+      Toast.show('Группа создана','success','👥');
+      this.renderGroups();
+    });
+    document.getElementById('joinGroupForm').addEventListener('submit', e=>{
+      e.preventDefault();
+      const code = document.getElementById('gCode').value.trim();
+      try{
+        const g = GroupManager.join(code, this.currentUser.id);
+        Modal.close('joinGroupModal'); e.target.reset();
+        Toast.show('Вы вступили в группу «'+g.name+'»','success','🎉');
+        this.renderGroups();
+      }catch(err){ Toast.show(err.message,'error','⚠️'); }
+    });
+    document.querySelectorAll('[data-lb]').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        document.querySelectorAll('[data-lb]').forEach(c=>c.classList.remove('active'));
+        chip.classList.add('active'); this.lbSortBy = chip.dataset.lb; this.renderLeaderboard();
+      });
+    });
+  },
+  renderGroups(){
+    const groups = GroupManager.forUser(this.currentUser.id);
+    const list = document.getElementById('groupsList');
+    if(!groups.length){
+      list.innerHTML = this.emptyState('👥','Пока нет групп','Создайте группу или вступите по коду приглашения.');
+    } else {
+      list.innerHTML = groups.map(g=>`
+        <div class="glass group-card fade-up">
+          <div class="avatar" style="background:${g.color};">${g.name[0].toUpperCase()}</div>
+          <div class="group-info">
+            <h4>${Utils.escapeHtml(g.name)}</h4>
+            <p>${Utils.escapeHtml(g.description||'Без описания')} · ${g.memberIds.length} участник(ов)</p>
+            <span class="group-code">Код: ${g.code}</span>
+          </div>
+          <button class="mini-btn leave-btn" data-id="${g.id}">Выйти</button>
+        </div>`).join('');
+      list.querySelectorAll('.leave-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          this.showConfirm('Покинуть группу?','Вы сможете вступить снова по коду.', ()=>{
+            GroupManager.leave(btn.dataset.id, this.currentUser.id);
+            this.renderGroups(); Toast.show('Вы покинули группу','info','👋');
+          });
+        });
+      });
+    }
+    this.renderLeaderboard();
+  },
+  renderLeaderboard(){
+    const rows = Leaderboard.rows(this.lbSortBy);
+    const list = document.getElementById('leaderboardList');
+    if(!rows.length){ list.innerHTML = this.emptyState('🏅','Рейтинг пуст',''); return; }
+    const valFor = r => this.lbSortBy==='time' ? Utils.fmtHoursShort(r.time) : (this.lbSortBy==='books'?r.books:(this.lbSortBy==='streak'?r.streak:r.pages));
+    list.innerHTML = rows.map((r,i)=>`
+      <div class="glass lb-row fade-up">
+        <div class="lb-rank ${i===0?'top1':i===1?'top2':i===2?'top3':''}">${i+1}</div>
+        <div class="avatar" style="width:36px;height:36px;font-size:13px;background:${r.user.color};">${Utils.initials(r.user.firstName,r.user.lastName)}</div>
+        <div class="lb-name"><b>${Utils.escapeHtml(r.user.firstName+' '+r.user.lastName)}</b><span>${r.user.id===this.currentUser.id?'Это вы':''}</span></div>
+        <div class="lb-val">${valFor(r)}</div>
+      </div>`).join('');
+  },
+ 
+  /* ---------- PROFILE ---------- */
+  renderProfile(){
+    const u = this.currentUser;
+    const st = StatisticsManager.forUser(u.id);
+    const lvl = StatisticsManager.level(u.id);
+    document.getElementById('profileAvatar').textContent = Utils.initials(u.firstName,u.lastName);
+    document.getElementById('profileAvatar').style.background = u.color;
+    document.getElementById('profileName').textContent = u.firstName+' '+u.lastName;
+    document.getElementById('profileLevel').textContent = 'Уровень '+lvl.level;
+    document.getElementById('levelBar').style.width = lvl.pct+'%';
+    document.getElementById('xpText').textContent = `${lvl.inLevel} / 100 XP · всего ${lvl.xp} XP`;
+    document.getElementById('pfBooks').textContent = st.totalBooks;
+    document.getElementById('pfPages').textContent = st.totalPages;
+    document.getElementById('pfHours').textContent = (st.totalSec/3600).toFixed(1);
+    document.getElementById('pfSessions').textContent = st.sessionsCount;
+ 
+    const unlocked = new Set(AchievementManager.unlocked(u.id));
+    const grid = document.getElementById('badgesGrid');
+    grid.innerHTML = ACHIEVEMENTS.map(a=>`
+      <div class="glass badge ${unlocked.has(a.id)?'':'locked'}">
+        <span class="ic">${a.icon}</span><span>${a.name}</span>
+      </div>`).join('');
+  },
+ 
+  /* ---------- SETTINGS ---------- */
+  bindSettings(){
+    document.getElementById('settingsBtn').addEventListener('click', ()=>{
+      const s = StorageManager.getSettings();
+      document.querySelectorAll('[data-theme-opt]').forEach(b=>b.classList.toggle('active', b.dataset.themeOpt===(s.theme||'light')));
+      document.querySelectorAll('[data-lang-opt]').forEach(b=>b.classList.toggle('active', b.dataset.langOpt===(s.lang||'ru')));
+      Modal.open('settingsModal');
+    });
+    document.getElementById('themeToggleBtn').addEventListener('click', ()=> ThemeManager.toggle());
+    document.querySelectorAll('[data-theme-opt]').forEach(btn=>{
+      btn.addEventListener('click', ()=> ThemeManager.apply(btn.dataset.themeOpt));
+    });
+    document.querySelectorAll('[data-lang-opt]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('[data-lang-opt]').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const s = StorageManager.getSettings(); s.lang = btn.dataset.langOpt; StorageManager.setSettings(s);
+        this.applyLanguage();
+        Toast.show('Язык обновлён','info','🌐');
+      });
+    });
+    document.getElementById('exportDataBtn').addEventListener('click', ()=>{
+      const data = StorageManager.exportAll();
+      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+      Utils.download('oqylyq-data.json', URL.createObjectURL(blob));
+      Toast.show('Данные экспортированы','success','📤');
+    });
+    document.getElementById('importDataInput').addEventListener('change', (e)=>{
+      const file = e.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        try{
+          const data = JSON.parse(reader.result);
+          StorageManager.importAll(data);
+          Toast.show('Данные импортированы','success','📥');
+          location.reload();
+        }catch(err){ Toast.show('Ошибка чтения файла','error','⚠️'); }
+      };
+      reader.readAsText(file);
+    });
+    document.getElementById('clearDataBtn').addEventListener('click', ()=>{
+      Modal.close('settingsModal');
+      this.showConfirm('Очистить все данные?', 'Все пользователи, сессии и настройки будут удалены безвозвратно.', ()=>{
+        StorageManager.clearAll(); location.reload();
+      });
+    });
+  },
+  applyLanguage(){
+    const lang = this.currentLang();
+    const t = I18N[lang] || I18N.ru;
+    document.getElementById('sloganText').textContent = t.slogan;
+    document.getElementById('ctaTitle').textContent = t.ready;
+    document.getElementById('ctaSub').textContent = t.readySub;
+  },
+ 
+  /* ---------- CONFIRM MODAL ---------- */
+  showConfirm(title, text, onYes){
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmText').textContent = text;
+    const btn = document.getElementById('confirmYesBtn');
+    const clone = btn.cloneNode(true);
+    btn.parentNode.replaceChild(clone, btn);
+    clone.addEventListener('click', ()=>{ Modal.close('confirmModal'); onYes(); });
+    Modal.open('confirmModal');
+  },
+ 
+  /* ---------- ONBOARDING ---------- */
+  maybeOnboard(){
+    if(StorageManager.get(StorageManager.KEYS.onboarded, false)) return;
+    const slides = [
+      {icon:'📚', title:'Добро пожаловать в Oqýlyq', text:'Отслеживайте своё чтение, ставьте рекорды и получайте достижения.'},
+      {icon:'⏱️', title:'Таймер чтения', text:'Нажмите «Начать чтение», чтобы запустить таймер сессии. Пауза и завершение — одним касанием.'},
+      {icon:'📊', title:'Статистика и прогресс', text:'Смотрите графики, серию дней подряд и уровень опыта на основе прочитанных страниц.'},
+      {icon:'👥', title:'Группы и рейтинг', text:'Создавайте группы, приглашайте друзей и соревнуйтесь в рейтинге читателей.'},
+    ];
+    let idx = 0;
+    const body = document.getElementById('onboardingBody');
+    const render = ()=>{
+      const s = slides[idx];
+      body.innerHTML = `
+        <div class="onb-slide">
+          <div class="onb-ic">${s.icon}</div>
+          <h3 style="font-size:20px; margin-bottom:8px;">${s.title}</h3>
+          <p class="muted">${s.text}</p>
+          <div class="onb-dots">${slides.map((_,i)=>`<div class="onb-dot ${i===idx?'active':''}"></div>`).join('')}</div>
+          <div class="flex gap-12 mt-16">
+            ${idx>0?'<button class="btn btn-secondary btn-block" id="onbBack">Назад</button>':''}
+            <button class="btn btn-primary btn-block" id="onbNext">${idx===slides.length-1?'Начать':'Далее'}</button>
+          </div>
+        </div>`;
+      document.getElementById('onbNext').addEventListener('click', ()=>{
+        if(idx===slides.length-1){
+          StorageManager.set(StorageManager.KEYS.onboarded, true);
+          Modal.close('onboardingModal');
+        } else { idx++; render(); }
+      });
+      const back = document.getElementById('onbBack');
+      if(back) back.addEventListener('click', ()=>{ idx--; render(); });
+    };
+    render();
+    Modal.open('onboardingModal');
+  }
+};
+ 
+document.addEventListener('DOMContentLoaded', ()=> App.init());
+})();
+</script>
+</body>
+</html>
